@@ -115,7 +115,7 @@ Copy Images vào VM => Tiến hành đóng Images
 
 # WebvirtCloud
 
-Cấu hình libvirt cho phép TCP connection kết nối 
+Cấu hình libvirt trên các node KVM cho phép TCP connection kết nối 
 ```sh 
 cp /etc/libvirt/libvirtd.conf /etc/libvirt/libvirtd.conf.orig
 sed -i 's|#listen_tls = 0|listen_tls = 0|'g /etc/libvirt/libvirtd.conf
@@ -133,3 +133,133 @@ systemctl restart openstack-nova-compute.service
 ```
 
 https://news.cloud365.vn/kvm-huong-dan-cai-dat-webvirtcloud-quan-li-ha-tang-kvm/
+
+## Cấu hình network 
+Mô hình 
+
+Tạo folder backup 
+```sh 
+mkdir -p /opt/backup-interface/
+cp ifcfg-* /opt/backup-interface/
+```
+
+### Đối với tạo Bridge bình thường 
+
+Tạo Bridge `public172`
+```sh 
+cat <<EOF >> /etc/sysconfig/network-scripts/br-public172
+DEVICE="public172"
+BOOTPROTO="static"
+IPADDR="172.16.4.124"
+NETMASK="255.255.240.0"
+GATEWAY="172.16.10.1"
+DNS1=8.8.8.8
+ONBOOT="yes"
+TYPE="Bridge"
+NM_CONTROLLED="no"
+EOF
+```
+
+Cắm `em1` vào Bridge vừa tạo 
+```sh 
+rm -f /etc/sysconfig/network-scripts/ifcfg-em1
+cat <<EOF >> /etc/sysconfig/network-scripts/br-em1
+DEVICE=em1
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+NM_CONTROLLED=no
+BRIDGE=public172
+EOF
+```
+
+### Đối với tạo các Bridge VLAN
+
+Điều chỉnh lại interface `em2`
+```sh 
+rm -f /etc/sysconfig/network-scripts/ifcfg-em2
+cat <<EOF >> /etc/sysconfig/network-scripts/ifcfg-em2
+DEVICE=em2
+TYPE=Ethernet
+BOOTPROTO=none
+ONBOOT=yes
+NM_CONTROLLED=no
+EOF
+```
+
+Tạo interface Vlan10 gắn vào interface em2
+```sh 
+cat <<EOF >> /etc/sysconfig/network-scripts/ifcfg-em2.10
+DEVICE=em2.10
+BOOTPROTO=none
+ONBOOT=yes
+VLAN=yes
+BRIDGE=vlan10
+TYPE=Ethernet
+NM_CONTROLLED=no
+EOF
+```
+
+Taọ Bridge Vlan10 cho Interface Vlan10 
+```sh 
+cat <<EOF >> /etc/sysconfig/network-scripts/ifcfg-vlan10 
+DEVICE=vlan10
+TYPE=Bridge
+BOOTPROTO=none
+ONBOOT=yes
+NM_CONTROLLED=no
+EOF
+```
+
+### Nâng cao hơn tý: Đối với tạo các Bridge VLAN (Có bridge trunk)
+
+Tạo Bridge trunk 
+```sh 
+cat <<EOF >> /etc/sysconfig/network-scripts/br-trunk
+DEVICE=brtrunk
+TYPE=Bridge
+BOOTPROTO=none
+ONBOOT=yes
+NM_CONTROLLED=no
+EOF 
+```
+
+Cắm `em2` vào Bridge vừa tạo 
+```sh 
+rm -f /etc/sysconfig/network-scripts/ifcfg-em2
+cat <<EOF >> /etc/sysconfig/network-scripts/ifcfg-em2
+TYPE=Ethernet
+BOOTPROTO=none
+NAME=em2
+DEVICE=em2
+ONBOOT=yes
+BRIDGE=brtrunk
+NM_CONTROLLED=no
+EOF
+```
+
+Tạo interface Vlan10 gắn vào Bridge trunk 
+```sh 
+cat <<EOF >> /etc/sysconfig/network-scripts/ifcfg-brtrunk.10
+DEVICE=brtrunk.10
+BOOTPROTO=none
+ONBOOT=yes
+VLAN=yes
+BRIDGE=vlan10
+TYPE=Ethernet
+NM_CONTROLLED=no
+EOF
+```
+
+Taọ Bridge Vlan10 cho Interface Vlan10 
+```sh 
+cat <<EOF >> /etc/sysconfig/network-scripts/ifcfg-vlan10 
+DEVICE=vlan10
+TYPE=Bridge
+BOOTPROTO=none
+ONBOOT=yes
+NM_CONTROLLED=no
+EOF
+```
+
+
