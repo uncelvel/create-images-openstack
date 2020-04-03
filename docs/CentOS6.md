@@ -200,6 +200,13 @@ Bổ sung hoặc chỉnh sửa `channel` trong <devices>  mục đích để HOS
 
 - Bật máy ảo lên
 
+-Setup timezone
+```sh
+cp /etc/localtime /root/old.timezone
+rm /etc/localtime
+ln -s /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime
+```
+
 - Disable IPv6
 ```sh
 echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
