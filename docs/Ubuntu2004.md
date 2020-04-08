@@ -236,12 +236,6 @@ Cấu hình user default
 sed -i 's/name: ubuntu/name: root/g' /etc/cloud/cloud.cfg
 ```
 
-Xóa bỏ thông tin của địa chỉ MAC
-```sh
-echo > /lib/udev/rules.d/75-persistent-net-generator.rules
-echo > /etc/udev/rules.d/70-persistent-net.rules
-```
-
 Disable default config route
 ```sh
 sed -i 's|link-local 169.254.0.0|#link-local 169.254.0.0|g' /etc/networks
@@ -254,7 +248,6 @@ Cài đặt `qemu-guest-agent`
 Để có thể thay đổi password máy ảo thì phiên bản qemu-guest-agent phải >= 2.5.0
 ```
 apt-get install software-properties-common -y
-add-apt-repository cloud-archive:rocky -y
 apt-get update -y
 apt-get install qemu-guest-agent -y
 ```
@@ -267,13 +260,14 @@ service qemu-guest-agent status
 
 Kết quả:
 ```
-QEMU Guest Agent 2.11.0
-* qemu-ga is running
+* qemu-guest-agent.service - QEMU Guest Agent
+     Loaded: loaded (/lib/systemd/system/qemu-guest-agent.service; static; vendor preset: enabled)
+     Active: inactive (dead)
 ```
 
 Cấu hình datasource 
 
- - Bỏ chọn mục `NoCloud` bằng cách dùng dấu `SPACE`, sau đó ấn `ENTER`
+- Bỏ chọn mục `NoCloud` bằng cách dùng dấu `SPACE`, sau đó ấn `ENTER`
 ```sh
 dpkg-reconfigure cloud-init
 ```
@@ -293,6 +287,7 @@ Clear toàn bộ history
 ```sh 
 apt-get clean all
 rm -f /var/log/wtmp /var/log/btmp
+> /var/log/cmdlog.log
 history -c
 ```
 
