@@ -261,6 +261,14 @@ EOF
 ```
 > Lưu ý: Sub interface khi đóng các app nếu sinh ra
 
+Xóa history
+```sh 
+apt-get clean all
+rm -f /var/log/wtmp /var/log/btmp
+history -c
+> /var/log/cmdlog.log
+```
+
 ## Bước 13: Tắt máy ảo
 
 ```sh
