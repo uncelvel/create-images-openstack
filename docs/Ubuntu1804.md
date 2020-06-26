@@ -247,7 +247,7 @@ Swap:             0           0           0
 
 Cấu hình để instance báo log ra console và đổi name Card mạng về eth* thay vì ens, eno
 ```sh
-sed -i 's|GRUB_CMDLINE_LINUX=""|GRUB_CMDLINE_LINUX="netcfg/do_not_use_netplan=true net.ifnames=0 biosdevname=0 console=tty1 console=ttyS0"|g' /etc/default/grub
+sed -i 's|GRUB_CMDLINE_LINUX=""|GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0 console=tty1 console=ttyS0"|g' /etc/default/grub
 update-grub
 ```
 
