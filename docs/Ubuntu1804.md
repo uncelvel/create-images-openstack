@@ -247,27 +247,21 @@ Swap:             0           0           0
 
 Cấu hình để instance báo log ra console và đổi name Card mạng về eth* thay vì ens, eno
 ```sh
-sed -i 's|GRUB_CMDLINE_LINUX=""|GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0 console=tty1 console=ttyS0"|g' /etc/default/grub
+sed -i 's|GRUB_CMDLINE_LINUX=""|GRUB_CMDLINE_LINUX="netcfg/do_not_use_netplan=true net.ifnames=0 biosdevname=0 console=tty1 console=ttyS0"|g' /etc/default/grub
 update-grub
 ```
 
-Cấu hình network sử dụng ifupdown thay vì netplan
-
- - Cài đặt service ifupdown 
+- Disable netplan && cài đặt ifupdown 
 ```sh
-apt-get install ifupdown -y
+sudo apt-get --purge remove netplan.io
+sudo rm -rf /usr/share/netplan
+sudo rm -rf /etc/netplan
+
+sudo apt-get update
+sudo apt-get install -y ifupdown
 ```
 
- - Disable netplan
-```sh
-cat << EOF > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
-network: {config: disabled}
-EOF
-
-rm -rf /etc/netplan50-cloud-init.yaml
-```
-
- - Tạo file interface
+- Tạo file interface
 ```sh
 cat << EOF > /etc/network/interfaces
 auto lo
